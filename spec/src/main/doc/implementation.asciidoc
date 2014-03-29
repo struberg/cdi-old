@@ -131,7 +131,7 @@ For example, if the bean class is named +ProductList+, the default bean name is 
 
 A _session bean_ is a bean that is implemented by a session bean with an EJB 3.x client view that is not annotated with +@Vetoed+ or in a package annotated +@Vetoed+. The basic lifecycle and semantics of EJB session beans are defined by the EJB specification.
 
-A stateless session bean must belong to the +@Dependent+ pseudo-scope. A singleton bean must belong to either the +@ApplicationScoped+ scope or to the +@Dependent+ pseudo-scope. If a session bean specifies an illegal scope, the container automatically detects the problem and treats it as a definition error. A stateful session bean may have any scope.
+A stateless session bean must belong to the +@Dependent+ pseudo-scope. A singleton session bean must belong to either the +@ApplicationScoped+ scope or to the +@Dependent+ pseudo-scope. If a session bean specifies an illegal scope, the container automatically detects the problem and treats it as a definition error. A stateful session bean may have any scope.
 
 When a contextual instance of a session bean is obtained via the dependency injection service, the behavior of +SessionContext.getInvokedBusinessInterface()+ is specific to the container implementation. Portable applications should not rely upon the value returned by this method.
 
@@ -160,7 +160,7 @@ If the application directly calls an EJB remove method of a contextual instance 
 
 ==== Bean types of a session bean
 
-The unrestricted set of bean types for a session bean contains all local interfaces of the bean and their superinterfaces. If the session bean has a bean class local view, the unrestricted set of bean types contains the bean class and all superclasses. In addition, +java.lang.Object+ is a bean type of every session bean.
+The unrestricted set of bean types for a session bean contains all local interfaces of the bean and their superinterfaces. If the session bean has a no-interface view, the unrestricted set of bean types contains the bean class and all superclasses. In addition, +java.lang.Object+ is a bean type of every session bean.
 
 Remote interfaces are not included in the set of bean types.
 
@@ -226,7 +226,7 @@ public class LoginActionBean implements LoginAction { ... }
 [source, java]
 ----
 @Stateless @Mock @Specializes
-public class MockLoginActionBean extends LoginActionBean { ... }
+public class MockLoginActionBean extends LoginActionBean implements LoginAction { ... }
 ----
 
 [[session_bean_name]]
@@ -254,11 +254,11 @@ If a producer method sometimes returns a null value, then the producer method mu
 
 If the producer method return type is a parameterized type, it must specify an actual type parameter or type variable for each type parameter.
 
-If a producer method return type contains a wildcard type parameter the container automatically detects the problem and treats it as a definition error.
+If a producer method return type contains a wildcard type parameter or is an array type whose component type contains a wildcard type parameter, the container automatically detects the problem and treats it as a definition error.
 
 If the producer method return type is a parameterized type with a type variable, it must have scope +@Dependent+. If a producer method with a parameterized return type with a type variable declares any scope other than +@Dependent+, the container automatically detects the problem and treats it as a definition error.
 
-If a producer method return type is a type variable the container automatically detects the problem and treats it as a definition error.
+If a producer method return type is a type variable or an array type whose component type is a type variable the container automatically detects the problem and treats it as a definition error.
 
 The application may call producer methods directly. However, if the application calls a producer method directly, no parameters will be passed to the producer method by the container; the returned object is not bound to any context; and its lifecycle is not managed by the container.
 
@@ -386,11 +386,11 @@ If a producer field sometimes contains a null value when accessed, then the prod
 
 If the producer field type is a parameterized type, it must specify an actual type parameter or type variable for each type parameter.
 
-If a producer field type contains a wildcard type parameter the container automatically detects the problem and treats it as a definition error.
+If a producer field type contains a wildcard type parameter or is an array type whose component type contains a wildcard parameter, the container automatically detects the problem and treats it as a definition error.
 
 If the producer field type is a parameterized type with a type variable, it must have scope +@Dependent+. If a producer field with a parameterized type with a type variable declares any scope other than +@Dependent+, the container automatically detects the problem and treats it as a definition error.
 
-If a producer field type is a type variable the container automatically detects the problem and treats it as a definition error.
+If a producer field type is a type variable or is an array type whose component type is a type variable the container automatically detects the problem and treats it as a definition error.
 
 The application may access producer fields directly. However, if the application accesses a producer field directly, the returned object is not bound to any context; and its lifecycle is not managed by the container.
 
@@ -551,7 +551,7 @@ The instance used by the container to service an invocation of a Java EE compone
 
 A _resource_ is a bean that represents a reference to a resource, persistence context, persistence unit, remote EJB or web service in the Java EE component environment.
 
-By declaring a resource, we enable an object from the Java EE component environment to be injected by a specifying only its type and qualifiers at the injection point. For example, if +@CustomerDatabase+ is a qualifier:
+By declaring a resource, we enable an object from the Java EE component environment to be injected by specifying only its type and qualifiers at the injection point. For example, if +@CustomerDatabase+ is a qualifier:
 
 [source, java]
 ----

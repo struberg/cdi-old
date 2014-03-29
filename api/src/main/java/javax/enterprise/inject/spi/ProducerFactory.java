@@ -6,7 +6,8 @@ package javax.enterprise.inject.spi;
  * </p>
  * 
  * <p>
- * The {@link ProducerFactory} obtained from {@link BeanManager#getProducerFactory()} is capable of providing container created
+ * The {@link ProducerFactory} obtained from {@link BeanManager#getProducerFactory(AnnotatedMethod, Bean)} or
+ * {@link BeanManager#getProducerFactory(AnnotatedField, Bean)} is capable of providing container created
  * producers. This factory can be wrapped to add behavior to container created producers.
  * </p>
  * 
@@ -25,7 +26,7 @@ package javax.enterprise.inject.spi;
  * </pre>
  * 
  * @author Pete Muir
- * @since 1.2-SNAPSHOT
+ * @since 1.1
  */
 public interface ProducerFactory<X> {
 

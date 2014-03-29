@@ -85,8 +85,11 @@ Almost any Java type may be a bean type of a bean:
 * A bean type may be a primitive type. Primitive types are considered to be identical to their corresponding wrapper types in +java.lang+.
 * A bean type may be a raw type.
 
+However, some Java types are not legal bean types :
 
-A type variable is not a legal bean type. A parameterized type that contains a wildcard type parameter is not a legal bean type.
+* A type variable is not a legal bean type.
+* A parameterized type that contains a wildcard type parameter is not a legal bean type.
+* An array type whose component type is not a legal bean type.
 
 Note that certain additional restrictions are specified in <<unproxyable>> for beans with a normal scope, as defined in <<normal_scope>>.
 
@@ -378,7 +381,7 @@ PaymentProcessor getPaymentProcessor(@Synchronous PaymentProcessor sync,
 
 Java EE components such as servlets, EJBs and JavaBeans do not have a well-defined _scope_. These components are either:
 
-* _singletons_, such as EJB singleton beans, whose state is shared between all clients,
+* _singletons_, such as EJB singleton session beans, whose state is shared between all clients,
 * _stateless objects_, such as servlets and stateless session beans, which do not contain client-visible state, or
 * objects that must be explicitly created and destroyed by their client, such as JavaBeans and stateful session beans, whose state is shared by explicit reference passing between clients.
 
@@ -422,7 +425,7 @@ The set of scope types is extensible.
 
 There are five standard scope types defined by this specification, all defined in the package +javax.enterprise.context+.
 
-* The +@RequestScoped+, +@ApplicationScoped+ and +@SessionScoped+ annotations defined in <<builtin_contexts>> represent the standard scopes defined by the Java Servlets specification.
+* The container must provide an implementation of the @RequestScoped, @ApplicationScoped and @SessionScoped annotations defined in <<builtin_contexts>> representing the standard scopes defined by the Java Servlets specification. Note that these standard scopes can be extended by third-party extensions as defined in <<context>>
 * The +@ConversationScoped+ annotation represents the conversation scope defined in <<conversation_context>>.
 * Finally, there is a +@Dependent+ pseudo-scope for dependent objects, as defined in <<dependent_context>>.
 
@@ -496,13 +499,35 @@ The _default scope_ for a bean which does not explicitly declare a scope depends
 
 If a bean explicitly declares a scope, any default scopes declared by stereotypes are ignored.
 
+[[default_bean_discovery]]
+
+=== Default bean discovery mode
+
+The default _bean discovery mode_ for a bean archive is `annotated`, and such a bean archive is said to be an _implicit bean archive_ as defined in <<bean_archive>>.
+
+If the _bean discovery mode_ is `annotated` then:
+
+* bean classes that don't have _bean defining annotation_ (as defined in <<bean_defining_annotations>>) and are not bean classes of sessions beans, are not discovered, and
+* producer methods (as defined in <<producer_method>>) that are not on a session bean and whose bean class does not have a _bean defining annotation_ are not discovered, and
+* producer fields (as defined in <<producer_field>>) that are not on a session bean and whose bean class does not have a _bean defining annotation_ are not discovered, and
+* disposer methods (as defined in <<disposer_method>>) that are not on a session bean and whose bean class does not have a _bean defining annotation_ are not discovered, and
+* observer methods (as defined in <<observes>>) that are not on a session bean and whose bean class does not have a _bean defining annotation_ are not discovered.
+
 [[bean_defining_annotations]]
 
-=== Bean defining annotations
+==== Bean defining annotations
 
-A bean class may have a _bean defining annotation_, allowing it to be placed anywhere in an application, as defined in <<bean_archive>>.
+A bean class may have a _bean defining annotation_, allowing it to be placed anywhere in an application, as defined in <<bean_archive>>. A bean class with a _bean defining annotation_ is said to be an _implicit bean_.
 
-Any scope type is a bean defining annotation. If a scope type is declared on a bean class, then the bean class is said to have a bean defining annotation. For example, this dependent scoped bean has a bean defining annotation:
+The set of bean defining annotations contains:
+
+* `@ApplicationScoped`, `@SessionScoped`, `@ConversationScoped` and `@RequestScoped` annotations,  
+* all other normal scope types,
+* `@Interceptor` and `@Decorator` annotations,
+* all stereotype annotations (i.e. annotations annotated with `@Stereotype`),
+* and the `@Dependent` scope annotation.
+
+If one of these annotations is declared on a bean class, then the bean class is said to have a bean defining annotation. For example, this dependent scoped bean has a bean defining annotation:
 
 [source,java]
 ----
@@ -524,6 +549,8 @@ public class CoffeeShop
     ...
 }
 ----
+
+Note that to ensure compatibility with other JSR-330 implementations, all pseudo-scope annotations except `@Dependent` *are not* bean defining annotations. However, a stereotype annotation including a pseudo-scope annotation *is* a bean defining annotation.
 
 [[names]]
 

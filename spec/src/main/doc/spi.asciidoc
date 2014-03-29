@@ -100,7 +100,7 @@ An +InterceptionType+ identifies the kind of lifecycle callback, EJB timeout met
 [source, java]
 ----
 public enum InterceptionType { 
-    AROUND_INVOKE, POST_CONSTRUCT, PRE_DESTROY, PRE_PASSIVATE, POST_ACTIVATE, AROUND_TIMEOUT
+    AROUND_INVOKE, AROUND_CONSTRUCT, POST_CONSTRUCT, PRE_DESTROY, PRE_PASSIVATE, POST_ACTIVATE, AROUND_TIMEOUT
 }
 ----
 
@@ -194,7 +194,20 @@ The container provides a built-in bean with bean type +BeanManager+, scope +@Dep
 @Inject BeanManager manager;
 ----
 
-Any operation of +BeanManager+ may be called at any time during the execution of the application.
+Most operations of the +BeanManager+ may be called at any time during the execution of the application.
+Note that - in order to prevent random behaviour caused by the not guaranteed order of class scanning - the following +BeanManager+ operations must not be called before the +AfterBeanDiscovery+
+phase:
+
+* +getReference()+
+* +getInjectableReference()+
+* +getBeans(String)+
+* +getBeans(Type, Annotation...)+
+* +getPassivationCapableBean()+
+* +resolve()+
+* +validate()+
+* +resolveObserverMethods()+
+* +resolveDecorators()+
+* +resolveInterceptors()+
 
 [[provider]]
 
@@ -556,8 +569,8 @@ The method +BeanManager.getProducerFactory()+ returns a factory capable of creat
 
 [source, java]
 ----
-public <X> ProducerFactory<? super X> getProducerFactory(AnnotatedField<? super X> field, Bean<X> declaringBean);
-public <X> ProducerFactory<? super X> getProducerFactory(AnnotatedMethod<? super X> method, Bean<X> declaringBean);
+public <X> ProducerFactory<X> getProducerFactory(AnnotatedField<? super X> field, Bean<X> declaringBean);
+public <X> ProducerFactory<X> getProducerFactory(AnnotatedMethod<? super X> method, Bean<X> declaringBean);
 ----
 
 [source, java]
@@ -630,7 +643,7 @@ public <T, X> Bean<T> createBean(BeanAttributes<T> attributes, Class<X> beanClas
 
 ==== Obtaining the instance of an +Extension+
 
-The method +BeanManager.getExtensions()+ returns the container's instance of an +Extension+ class declared in +META-INF/services+, or throws an +IllegalArgumentException+ if the container has no instance of the given class.
+The method +BeanManager.getExtension()+ returns the container's instance of an +Extension+ class declared in +META-INF/services+, or throws an +IllegalArgumentException+ if the container has no instance of the given class.
 
 [source, java]
 ----
@@ -935,10 +948,7 @@ If any observer method of the +BeforeShutdown+ event throws an exception, the ex
 
 ==== +ProcessAnnotatedType+ event
 
-The container must fire an event, before it processes a type, for:
-
-* every Java class, interface or enum discovered
-* each Java class, interface or enum that must be delivered to a +ProcessAnnotatedType+ observer, where the event parameter is annotated with +@WithAnnotations+.
+The container must fire an event, before it processes a type, for every Java class, interface (excluding the special kind of interface declaration _annotation type_) or enum discovered
 
 as defined in <<bean_discovery>>
 

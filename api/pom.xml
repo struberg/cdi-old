@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.jboss.weld</groupId>
 		<artifactId>weld-parent</artifactId>
-		<version>21</version>
+		<version>26</version>
 		<relativePath />
 	</parent>
 
@@ -16,7 +16,7 @@
 	<name>CDI APIs</name>
 	<description>APIs for CDI (Contexts and Dependency Injection for Java EE)</description>
 
-	<url>http://www.seamframework.org/Weld</url>
+	<url>http://cdi-spec.org</url>
 	<licenses>
 		<license>
 			<name>Apache License, Version 2.0</name>
@@ -46,38 +46,62 @@
 		<developer>
 			<name>Pete Muir</name>
 			<id>pmuir</id>
+			<timezone>GMT</timezone>
 			<organization>Red Hat Inc.</organization>
 			<roles>
 				<role>Specfication Lead</role>
 			</roles>
-			<email>pmuir@redhat.com</email>
+			<email>pmuir[at]redhat[dot]com</email>
 		</developer>
 
 		<developer>
-			<name>Shane Bryzak</name>
+			<name>Antoine Sabot-Durand</name>
+			<id>asabotdu</id>
+			<timezone>CET</timezone>
 			<organization>Red Hat Inc.</organization>
+			<roles>
+				<role>Specfication co-lead</role>
+			</roles>
+			<email>asd[at]redhat[dot]com</email>
 		</developer>
 
 		<developer>
-			<name>David Allen</name>
+			<name>Mark Struberg</name>
+			<id>mstruberg</id>
+			<timezone>CET</timezone>
+			<roles>
+				<role>Implementation developer</role>
+			</roles>
+			<email>struberg[at]yahoo[dot]de</email>
 		</developer>
 
 		<developer>
-			<name>Nicklas Karlsson</name>
+			<name>Jozef Hartinger</name>
+			<id>jhartinger</id>
+			<timezone>CET</timezone>
+			<organization>Red Hat Inc.</organization>
+			<roles>
+				<role>RI tech lead</role>
+			</roles>
+			<email>jhartinger[at]redhat[dot]com</email>
 		</developer>
 
 		<developer>
-			<name>George Gastaldi</name>
+			<name>Martin Kouba</name>
+			<id>mkouba</id>
+			<organization>Red Hat Inc.</organization>
+			<roles>
+				<role>TCK tech lead</role>
+			</roles>
+			<email>mkouba[at]redhat[dot]com</email>
 		</developer>
 	</developers>
 
 
 	<properties>
 		<atinject.api.version>1</atinject.api.version>
-		<ejb.api.version>1.0.0.CR2</ejb.api.version>
-		<jsr250.api.version>1.0</jsr250.api.version>
-		<uel.api.version>2.2</uel.api.version>
-		<interceptor.api.version>1.0.0.Beta1</interceptor.api.version>
+		<uel.api.version>3.0.0</uel.api.version>
+		<interceptor.api.version>1.2</interceptor.api.version>
 	</properties>
 
 	<!-- Configure all dependencies (e.g. testing) -->
@@ -92,12 +116,6 @@
 			</dependency>
 
 			<dependency>
-				<groupId>javax.annotation</groupId>
-				<artifactId>jsr250-api</artifactId>
-				<version>${jsr250.api.version}</version>
-			</dependency>
-
-			<dependency>
 				<groupId>javax.inject</groupId>
 				<artifactId>javax.inject</artifactId>
 				<version>${atinject.api.version}</version>
@@ -105,33 +123,13 @@
 
 			<dependency>
 				<groupId>javax.el</groupId>
-				<artifactId>el-api</artifactId>
+				<artifactId>javax.el-api</artifactId>
 				<version>${uel.api.version}</version>
 			</dependency>
 
-			<!-- TODO replace with javax.ejb:ejb-api:3.1 once the JCP/Sun publish 
-				this -->
 			<dependency>
-				<groupId>org.jboss.spec.javax.ejb</groupId>
-				<artifactId>jboss-ejb-api_3.1_spec</artifactId>
-				<version>${ejb.api.version}</version>
-				<exclusions>
-					<exclusion>
-						<artifactId>jboss-transaction-api_1.2-SNAPSHOT_spec</artifactId>
-						<groupId>org.jboss.spec.javax.transaction</groupId>
-					</exclusion>
-					<exclusion>
-						<artifactId>jaxrpc-api</artifactId>
-						<groupId>javax.xml</groupId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-
-			<!-- TODO replace with javax.interceptor:interceptor-api:3.1 once the 
-				JCP/Sun publish this -->
-			<dependency>
-				<groupId>org.jboss.spec.javax.interceptor</groupId>
-				<artifactId>jboss-interceptors-api_1.2-SNAPSHOT_spec</artifactId>
+				<groupId>javax.interceptor</groupId>
+				<artifactId>javax.interceptor-api</artifactId>
 				<version>${interceptor.api.version}</version>
 			</dependency>
 
@@ -141,23 +139,12 @@
 	<dependencies>
 		<dependency>
 			<groupId>javax.el</groupId>
-			<artifactId>el-api</artifactId>
+			<artifactId>javax.el-api</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.jboss.spec.javax.ejb</groupId>
-			<artifactId>jboss-ejb-api_3.1_spec</artifactId>
-			<optional>true</optional>
-		</dependency>
-
-		<dependency>
-			<groupId>org.jboss.spec.javax.interceptor</groupId>
-			<artifactId>jboss-interceptors-api_1.2-SNAPSHOT_spec</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>javax.annotation</groupId>
-			<artifactId>jsr250-api</artifactId>
+			<groupId>javax.interceptor</groupId>
+			<artifactId>javax.interceptor-api</artifactId>
 		</dependency>
 
 		<dependency>
@@ -175,9 +162,9 @@
 	</dependencies>
 
 	<scm>
-		<connection>scm:git:git@github.com:jboss/cdi.git</connection>
-		<url>scm:git:git@github.com:jboss/cdi.git</url>
-		<developerConnection>scm:git:git@github.com:jboss/cdi.git</developerConnection>
+		<connection>scm:git:git@github.com:cdi-spec/cdi.git</connection>
+		<url>scm:git:git@github.com:cdi-spec/cdi.git</url>
+		<developerConnection>scm:git:git@github.com:cdi-spec/cdi.git</developerConnection>
 	</scm>
 
 	<profiles>

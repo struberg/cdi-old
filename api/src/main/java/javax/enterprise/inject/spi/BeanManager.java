@@ -55,7 +55,9 @@ import javax.enterprise.util.Nonbinding;
  * </p>
  * 
  * <p>
- * Any operation of <tt>BeanManager</tt> may be called at any time during the execution of the application.
+ * Most operations of <tt>BeanManager</tt> may be called at any time during the execution of the application.
+ * Note that - in order to prevent random behaviour caused by the not guaranteed order of class scanning - some BeanManager operations must not be called
+ * before the {@link AfterBeanDiscovery} event is fired.
  * </p>
  * 
  * @author Gavin King
@@ -76,10 +78,8 @@ public interface BeanManager {
      *        {@link javax.enterprise.context.Dependent} that is created
      * @return a contextual reference representing the bean
      * @throws IllegalArgumentException if the given type is not a bean type of the given bean
-     * @throws IllegalStateException if called during application initialization, before the {@link AfterDeploymentValidation}
-     *         event is fired The container is permitted to define a non-portable mode in which
-     *         {@link #getReference(Bean, Type, CreationalContext)} may be called from an observer of the
-     *         {@link AfterBeanDiscovery} event.
+     * @throws IllegalStateException if called during application initialization, before the {@link AfterBeanDiscovery}
+     *         event is fired.
      */
     public Object getReference(Bean<?> bean, Type beanType, CreationalContext<?> ctx);
 
@@ -94,10 +94,8 @@ public interface BeanManager {
      * @return the injectable reference
      * @throws UnsatisfiedResolutionException if typesafe resolution results in an unsatisfied dependency
      * @throws AmbiguousResolutionException typesafe resolution results in an unresolvable ambiguous dependency
-     * @throws IllegalStateException if called during application initialization, before the {@link AfterDeploymentValidation}
-     *         event is fired The container is permitted to define a non-portable mode in which
-     *         {@link #getInjectableReference(InjectionPoint, CreationalContext)} may be called from an observer of the
-     *         {@link AfterBeanDiscovery} event.
+     * @throws IllegalStateException if called during application initialization, before the {@link AfterBeanDiscovery}
+     *         event is fired.
      */
     public Object getInjectableReference(InjectionPoint ij, CreationalContext<?> ctx);
 
@@ -123,9 +121,8 @@ public interface BeanManager {
      * @throws IllegalArgumentException if the given type represents a type variable
      * @throws IllegalArgumentException if two instances of the same qualifier type are given
      * @throws IllegalArgumentException if an instance of an annotation that is not a qualifier type is given
-     * @throws IllegalStateException if called during application initialization, before the {@link AfterDeploymentValidation}
-     *         event is fired The container is permitted to define a non-portable mode in which
-     *         {@link #getBeans(Type, Annotation...)} may be called from an observer of the {@link AfterBeanDiscovery} event.
+     * @throws IllegalStateException if called during application initialization, before the {@link AfterBeanDiscovery}
+     *         event is fired.
      */
     public Set<Bean<?>> getBeans(Type beanType, Annotation... qualifiers);
 
@@ -136,9 +133,8 @@ public interface BeanManager {
      * 
      * @param name the EL name
      * @return the resulting set of {@linkplain Bean beans}
-     * @throws IllegalStateException if called during application initialization, before the {@link AfterDeploymentValidation}
-     *         event is fired The container is permitted to define a non-portable mode in which {@link #getBeans(String)} may be
-     *         called from an observer of the {@link AfterBeanDiscovery} event.
+     * @throws IllegalStateException if called during application initialization, before the {@link AfterBeanDiscovery}
+     *         event is fired.
      */
     public Set<Bean<?>> getBeans(String name);
 
@@ -148,10 +144,8 @@ public interface BeanManager {
      * @param id the identifier
      * @return a {@link Bean} that implements {@link javax.enterprise.inject.spi.PassivationCapable} and has the given
      *         identifier, or a null value if there is no such bean
-     * @throws IllegalStateException if called during application initialization, before the {@link AfterDeploymentValidation}
-     *         event is fired The container is permitted to define a non-portable mode in which
-     *         {@link #getPassivationCapableBean(String)} may be called from an observer of the {@link AfterBeanDiscovery}
-     *         event.
+     * @throws IllegalStateException if called during application initialization, before the {@link AfterBeanDiscovery}
+     *         event is fired.
      */
     public Bean<?> getPassivationCapableBean(String id);
 
@@ -160,11 +154,10 @@ public interface BeanManager {
      * 
      * @param <X> a common type of the beans
      * @param beans a set of {@linkplain Bean beans} of the given type
-     * @returns the resolved bean, or null if null or an empty set is passed
+     * @return the resolved bean, or null if null or an empty set is passed
      * @throws AmbiguousResolutionException if the ambiguous dependency resolution rules fail
-     * @throws IllegalStateException if called during application initialization, before the {@link AfterDeploymentValidation}
-     *         event is fired The container is permitted to define a non-portable mode in which {@link #resolve(Set)} may be
-     *         called from an observer of the {@link AfterBeanDiscovery} event.
+     * @throws IllegalStateException if called during application initialization, before the {@link AfterBeanDiscovery}
+     *         event is fired.
      */
     public <X> Bean<? extends X> resolve(Set<Bean<? extends X>> beans);
 
@@ -174,9 +167,8 @@ public interface BeanManager {
      * @param injectionPoint the {@linkplain InjectionPoint injection point} to validate
      * @throws InjectionException if there is a deployment problem (for example, an unsatisfied or unresolvable ambiguous
      *         dependency) associated with the injection point
-     * @throws IllegalStateException if called during application initialization, before the {@link AfterDeploymentValidation}
-     *         event is fired The container is permitted to define a non-portable mode in which
-     *         {@link #validate(InjectionPoint)} may be called from an observer of the {@link AfterBeanDiscovery} event.
+     * @throws IllegalStateException if called during application initialization, before the {@link AfterBeanDiscovery}
+     *         event is fired.
      */
     public void validate(InjectionPoint injectionPoint);
 
@@ -204,10 +196,8 @@ public interface BeanManager {
      * @throws IllegalArgumentException if the runtime type of the event object contains a type variable
      * @throws IllegalArgumentException if two instances of the same qualifier type are given
      * @throws IllegalArgumentException if an instance of an annotation that is not a qualifier type is given
-     * @throws IllegalStateException if called during application initialization, before the {@link AfterDeploymentValidation}
-     *         event is fired The container is permitted to define a non-portable mode in which
-     *         {@link #resolveObserverMethods(Object, Annotation...)} may be called from an observer of the
-     *         {@link AfterBeanDiscovery} event.
+     * @throws IllegalStateException if called during application initialization, before the {@link AfterBeanDiscovery}
+     *         event is fired.
      */
     public <T> Set<ObserverMethod<? super T>> resolveObserverMethods(T event, Annotation... qualifiers);
 
@@ -222,10 +212,8 @@ public interface BeanManager {
      * @throws IllegalArgumentException if the set of bean types is empty
      * @throws IllegalArgumentException if an annotation which is not a binding type is passed
      * @throws IllegalArgumentException if two instances of the same binding type are passed
-     * @throws IllegalStateException if called during application initialization, before the {@link AfterDeploymentValidation}
-     *         event is fired The container is permitted to define a non-portable mode in which
-     *         {@link #resolveDecorators(Set, Annotation...)} may be called from an observer of the {@link AfterBeanDiscovery}
-     *         event.
+     * @throws IllegalStateException if called during application initialization, before the {@link AfterBeanDiscovery}
+     *         event is fired.
      */
     public List<Decorator<?>> resolveDecorators(Set<Type> types, Annotation... qualifiers);
 
@@ -240,10 +228,8 @@ public interface BeanManager {
      * @throws IllegalArgumentException if no interceptor binding type is given
      * @throws IllegalArgumentException if two instances of the same interceptor binding type are given
      * @throws IllegalArgumentException if an instance of an annotation that is not an interceptor binding type is given
-     * @throws IllegalStateException if called during application initialization, before the {@link AfterDeploymentValidation}
-     *         event is fired The container is permitted to define a non-portable mode in which
-     *         {@link #resolveInterceptors(InterceptionType, Annotation...)} may be called from an observer of the
-     *         {@link AfterBeanDiscovery} event.
+     * @throws IllegalStateException if called during application initialization, before the {@link AfterBeanDiscovery}
+     *         event is fired.
      */
     public List<Interceptor<?>> resolveInterceptors(InterceptionType type, Annotation... interceptorBindings);
 
@@ -318,10 +304,10 @@ public interface BeanManager {
      * Determine if two qualifiers are considered equivalent for the purposes of typesafe resolution, taking into account any
      * members annotated with {@link Nonbinding}.
      * 
-     * @param a1 a qualifier to check
-     * @param a2 a qualifier to check
+     * @param qualifier1 a qualifier to check
+     * @param qualifier2 a qualifier to check
      * @return true if the two qualifiers are equivalent, otherwise false
-     * @since 1.2-SNAPSHOT
+     * @since 1.1
      */
     public boolean areQualifiersEquivalent(Annotation qualifier1, Annotation qualifier2);
 
@@ -329,10 +315,10 @@ public interface BeanManager {
      * Determine if two interceptor bindings are considered equivalent for the purposes of typesafe resolution, taking into
      * account any members annotated with {@link Nonbinding}.
      * 
-     * @param a1 an interceptor binding to check
-     * @param a2 an interceptor binding to check
+     * @param interceptorBinding1 an interceptor binding to check
+     * @param interceptorBinding2 an interceptor binding to check
      * @return true if the two interceptor bindings are equivalent, otherwise false
-     * @since 1.2-SNAPSHOT
+     * @since 1.1
      */
     public boolean areInterceptorBindingsEquivalent(Annotation interceptorBinding1, Annotation interceptorBinding2);
 
@@ -342,7 +328,7 @@ public interface BeanManager {
      * 
      * @param qualifier the qualifier to consider
      * @return the hashCode for the qualifier
-     * @since 1.2-SNAPSHOT
+     * @since 1.1
      */
     public int getQualifierHashCode(Annotation qualifier);
 
@@ -352,7 +338,7 @@ public interface BeanManager {
      * 
      * @param interceptorBinding the interceptor binding to consider
      * @return the hashCode for the interceptor binding
-     * @since 1.2-SNAPSHOT
+     * @since 1.1
      */
     public int getInterceptorBindingHashCode(Annotation interceptorBinding);
 
@@ -402,12 +388,12 @@ public interface BeanManager {
      * </p>
      * 
      * <p>
-     * This method is deprecated from CDI 1.2-SNAPSHOT and {@link #getInjectionTargetFactory(AnnotatedType)} should be used instead.
+     * This method is deprecated from CDI 1.1 and {@link #getInjectionTargetFactory(AnnotatedType)} should be used instead.
      * </p>
      * 
      * @param <T> the type
      * @param type the {@link AnnotatedType}
-     * @returns a container provided implementation of {@link InjectionTarget}
+     * @return a container provided implementation of {@link InjectionTarget}
      * @throws IllegalArgumentException if there is a definition error associated with any injection point of the type
      */
     public <T> InjectionTarget<T> createInjectionTarget(AnnotatedType<T> type);
@@ -423,7 +409,7 @@ public interface BeanManager {
      * 
      * @param annotatedType the annotated type to create the injection target factory for
      * @return an {@link InjectionTargetFactory}
-     * @since 1.2-SNAPSHOT
+     * @since 1.1
      */
     public <T> InjectionTargetFactory<T> getInjectionTargetFactory(AnnotatedType<T> annotatedType);
 
@@ -441,7 +427,7 @@ public interface BeanManager {
      * @param declaringBean the bean declaring the producer. May be null if the producer is static or the declaring object is
      *        non-contextual
      * @return the producer factory for the field
-     * @since 1.2-SNAPSHOT
+     * @since 1.1
      */
     public <X> ProducerFactory<X> getProducerFactory(AnnotatedField<? super X> field, Bean<X> declaringBean);
 
@@ -459,7 +445,7 @@ public interface BeanManager {
      * @param declaringBean the bean declaring the producer. May be null if the producer is static or the declaring object is
      *        non-contextual
      * @return the producer factory for the method
-     * @since 1.2-SNAPSHOT
+     * @since 1.1
      */
     public <X> ProducerFactory<X> getProducerFactory(AnnotatedMethod<? super X> method, Bean<X> declaringBean);
 
@@ -471,7 +457,7 @@ public interface BeanManager {
      * @param <T> the type
      * @param type the {@link AnnotatedType}
      * @return a container provided implementation of {@link InjectionTarget}
-     * @since 1.2-SNAPSHOT
+     * @since 1.1
      */
     public <T> BeanAttributes<T> createBeanAttributes(AnnotatedType<T> type);
 
@@ -480,10 +466,9 @@ public interface BeanManager {
      * declared by the elements of the actual Java class and uses the metadata provided via the {@link Annotated} interface
      * instead.
      * 
-     * @param <T> the type
      * @param type the {@link AnnotatedType}
      * @return a container provided implementation of {@link InjectionTarget}
-     * @since 1.2-SNAPSHOT
+     * @since 1.1
      */
     public BeanAttributes<?> createBeanAttributes(AnnotatedMember<?> type);
 
@@ -495,7 +480,7 @@ public interface BeanManager {
      * <p>
      * The {@link InjectionTarget} creates and destroys instances of the bean, performs dependency injection and lifecycle
      * callbacks, and determines the return value of {@link Bean#getInjectionPoints()}. The {@link InjectionTarget} is obtained
-     * from the {@link InjectionTargetFactory}. {@link #getInjectionTargetFactory()} allows use of a container created
+     * from the {@link InjectionTargetFactory}. {@link #getInjectionTargetFactory(AnnotatedType)} allows use of a container created
      * {@link InjectionTarget}.
      * </p>
      * 
@@ -505,7 +490,7 @@ public interface BeanManager {
      * @param beanClass a class, which determines the return value of {@link Bean#getBeanClass()}
      * @param injectionTargetFactory an {@link InjectionTargetFactory}, used to obtain an {@link InjectionTarget}
      * @return a container provided implementation of {@link Bean}
-     * @since 1.2-SNAPSHOT
+     * @since 1.1
      */
     public <T> Bean<T> createBean(BeanAttributes<T> attributes, Class<T> beanClass,
             InjectionTargetFactory<T> injectionTargetFactory);
@@ -518,7 +503,8 @@ public interface BeanManager {
      * <p>
      * The {@link Producer} creates and destroys instances of the decorator, and determines the return value of
      * {@link Bean#getInjectionPoints()}. The {@link Producer} is obtained from the {@link ProducerFactory}.
-     * {@link #getProducerFactory()} allows use of a container created {@link Producer}.
+     * {@link #getProducerFactory(AnnotatedMethod, Bean)} or {@link #getProducerFactory(AnnotatedField, Bean)} allows use of a
+     * container created {@link Producer}.
      * </p>
      * 
      * @param <T> the type
@@ -528,7 +514,7 @@ public interface BeanManager {
      * @param beanClass a class, which determines the return value of {@link Bean#getClass()}
      * @param producerFactory a {@link ProducerFactory}, used to obtain a {@link Producer}
      * @return a container provided implementation of {@link Bean}
-     * @since 1.2-SNAPSHOT
+     * @since 1.1
      */
     public <T, X> Bean<T> createBean(BeanAttributes<T> attributes, Class<X> beanClass, ProducerFactory<X> producerFactory);
 
@@ -538,7 +524,7 @@ public interface BeanManager {
      * @param field the {@link AnnotatedField} defining the injection point
      * @return the container provided {@link InjectionPoint}
      * @throws IllegalArgumentException if there is a definition error associated with the injection point
-     * @since 1.2-SNAPSHOT
+     * @since 1.1
      */
     public InjectionPoint createInjectionPoint(AnnotatedField<?> field);
 
@@ -548,7 +534,7 @@ public interface BeanManager {
      * @param parameter the {@link AnnotatedParameter} defining the injection point
      * @return the container provided {@link InjectionPoint}
      * @throws IllegalArgumentException if there is a definition error associated with the injection point
-     * @since 1.2-SNAPSHOT
+     * @since 1.1
      */
     public InjectionPoint createInjectionPoint(AnnotatedParameter<?> parameter);
 
@@ -559,7 +545,7 @@ public interface BeanManager {
      * @param extensionClass the type of the extension class
      * @return the extension instance
      * @throws IllegalArgumentException if the container has no instance of the given class
-     * @since 1.2-SNAPSHOT
+     * @since 1.1
      */
     public <T extends Extension> T getExtension(Class<T> extensionClass);
 
